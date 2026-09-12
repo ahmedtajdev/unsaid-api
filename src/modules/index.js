@@ -1,2 +1,3 @@
 export * from "./authentication/index.js";
-// Export other module's index.js files here
+export * from "./user/index.js";
+export * from "./message/index.js";
