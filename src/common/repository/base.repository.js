@@ -42,19 +42,17 @@ export const findById = async ({ model, id, options = {} } = {}) => {
   return query.exec();
 };
 
-export const createOne = async ({ model, data = {}, options = {} } = {}) => {
-  return model.create(data, {
-    validateBeforeSave: true,
-    ...options,
-  });
+export const create = async ({ model, data = [], options = {} } = {}) => {
+  return await model.create(data, options);
 };
 
-export const create = async ({ model, data = [], options = {} } = {}) => {
-  return model.create(data, options);
+export const createOne = async ({ model, data = {}, options = {} } = {}) => {
+  const [doc] = await create({ model, data: [data], options });
+  return doc;
 };
 
 export const insertMany = async ({ model, data = [], options = {} } = {}) => {
-  return model.insertMany(data, options);
+  return await model.insertMany(data, options);
 };
 
 export const updateOne = async ({
@@ -63,7 +61,7 @@ export const updateOne = async ({
   update,
   options = {},
 } = {}) => {
-  return model
+  return await model
     .updateOne(filter, update, {
       runValidators: true,
       ...options,
@@ -77,7 +75,7 @@ export const findOneAndUpdate = async ({
   update,
   options = {},
 } = {}) => {
-  return model
+  return await model
     .findOneAndUpdate(filter, update, {
       new: true,
       runValidators: true,
@@ -92,7 +90,7 @@ export const findByIdAndUpdate = async ({
   update,
   options = {},
 } = {}) => {
-  return model
+  return await model
     .findByIdAndUpdate(id, update, {
       new: true,
       runValidators: true,
@@ -102,13 +100,13 @@ export const findByIdAndUpdate = async ({
 };
 
 export const deleteOne = async ({ model, filter = {} } = {}) => {
-  return model.deleteOne(filter).exec();
+  return await model.deleteOne(filter).exec();
 };
 
 export const findOneAndDelete = async ({ model, filter = {} } = {}) => {
-  return model.findOneAndDelete(filter).exec();
+  return await model.findOneAndDelete(filter).exec();
 };
 
 export const count = async ({ model, filter = {} } = {}) => {
-  return model.countDocuments(filter).exec();
+  return await model.countDocuments(filter).exec();
 };
