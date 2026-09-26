@@ -12,7 +12,7 @@ import {
 } from "../../common/security/index.js";
 import { OAuth2Client } from "google-auth-library";
 import { WEB_CLIENT_IDS } from "../../config.js";
-import { providerEnum } from "../../common/enum/user.enum.js";
+import { ProviderEnum } from "../../common/enum/user.enum.js";
 
 const client = new OAuth2Client();
 
@@ -43,7 +43,7 @@ export const signupWithGmail = async ({ idToken }) => {
     });
 
     if (existAccount) {
-      if (existAccount.provider !== providerEnum.GOOGLE) {
+      if (existAccount.provider !== ProviderEnum.GOOGLE) {
         throw ConflictException("Invalid account provider");
       }
 
@@ -59,7 +59,7 @@ export const signupWithGmail = async ({ idToken }) => {
         username: name,
         email,
         confirmEmail: new Date(),
-        provider: providerEnum.GOOGLE,
+        provider: ProviderEnum.GOOGLE,
         image: picture,
       },
     });
@@ -102,13 +102,11 @@ export const signup = async ({ username, email, password }) => {
   }
 };
 
-export const login = async ({ email, password }) => {
+export const login = async ({ email, password }, issuer) => {
   try {
-    console.log({ email, password });
-
     const user = await findOne({
       model: UserModel,
-      filter: { email, provider: providerEnum.SYSTEM },
+      filter: { email, provider: ProviderEnum.SYSTEM },
     });
 
     if (!user) {
@@ -121,7 +119,7 @@ export const login = async ({ email, password }) => {
       throw NotfoundException("Not Exist");
     }
 
-    return await createLoginCredentials({ user });
+    return await createLoginCredentials({ user, issuer });
   } catch (error) {
     console.log({ error });
     throw error;

@@ -1,29 +1,24 @@
 import { ConflictException } from "../../common/exceptions/index.js";
-import { findById, findByIdAndUpdate } from "../../common/repository/index.js";
+import { findByIdAndUpdate } from "../../common/repository/index.js";
 import { createLoginCredentials } from "../../common/security/index.js";
 import { ACCESS_TOKEN_EXPIRES_IN } from "../../config.js";
 import { UserModel } from "../../DB/models/index.js";
 
-export const getProfile = async (userId) => {
-  const user = await findById({
-    model: UserModel,
-    id: userId,
-    options: { select: "-password" },
-  });
+export const getProfile = async (user) => {
   return user;
 };
 
-export const updateProfile = async (userId, update) => {
+export const updateProfile = async (user, update) => {
   const updatedUser = await findByIdAndUpdate({
     model: UserModel,
-    id: userId,
+    id: user._id,
     update,
     options: { select: "-password" },
   });
   return updatedUser;
 };
 
-export const rotateToken = async (payload) => {
+export const rotateToken = async ({ payload, user, issuer } = {}) => {
   const accessExpiresIn = (payload.iat + ACCESS_TOKEN_EXPIRES_IN) * 1000;
   const currentTime = Date.now();
 
@@ -33,5 +28,5 @@ export const rotateToken = async (payload) => {
     );
   }
 
-  return await createLoginCredentials({ user: payload });
+  return await createLoginCredentials({ user, issuer });
 };

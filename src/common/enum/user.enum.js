@@ -8,7 +8,7 @@ export const RoleEnum = {
   ADMIN: 1,
 };
 
-export const providerEnum = {
+export const ProviderEnum = {
   SYSTEM: 0,
   GOOGLE: 1,
 };

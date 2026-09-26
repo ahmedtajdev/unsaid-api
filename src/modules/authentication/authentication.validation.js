@@ -1,30 +1,44 @@
 import { z } from "zod";
+import { LanguageEnum } from "../../common/enum/index.js";
+import { generalValidationFields } from "../../common/validation.js";
 
-export const loginSchema = z.strictObject({
-  email: z.email(),
-  password: z.string().min(8).max(16),
-});
+const loginSchema = (lang = LanguageEnum.EN) =>
+  z.strictObject({
+    email: generalValidationFields.email(lang),
+    password: generalValidationFields.password(lang),
+  });
 
-export const signupSchema = loginSchema
-  .safeExtend({
-    username: z.string(),
-    phone: z.e164(),
-    confirmPassword: z.string().min(8).max(16),
-  })
-  .superRefine((data, ctx) => {
-    if (data.password !== data.confirmPassword) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["confirmPassword"],
-        message: "Password mismatch with confirmation password",
-      });
-    }
+export const login = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: loginSchema(lang),
+  });
 
-    if (!data.username.includes(" ")) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["username"],
-        message: "Username must contain two parts",
-      });
-    }
+export const signup = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: loginSchema(lang)
+      .safeExtend({
+        username: generalValidationFields.username(lang),
+        phone: generalValidationFields.phone(lang),
+        confirmPassword: generalValidationFields.password(lang),
+      })
+      .superRefine((data, ctx) => {
+        generalValidationFields.matchFields({
+          original: "password",
+          copy: "confirmPassword",
+          data,
+          ctx,
+          lang,
+        });
+
+        if (!data.username.includes(" ")) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["username"],
+            message:
+              lang === LanguageEnum.EN
+                ? "Username must contain two parts"
+                : "يجب أن يحتوي اسم المستخدم على جزأين",
+          });
+        }
+      }),
   });

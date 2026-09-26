@@ -2,7 +2,7 @@ import { Router } from "express";
 import { getProfile, rotateToken, updateProfile } from "./user.service.js";
 import { successResponse } from "../../common/utils/index.js";
 import { authentication } from "../../middleware/index.js";
-import { tokenTypeEnum } from "../../common/enum/security.enum.js";
+import { TokenTypeEnum } from "../../common/enum/security.enum.js";
 import { authorization } from "../../middleware/authorization.middleware.js";
 import { RoleEnum } from "../../common/enum/user.enum.js";
 
@@ -10,28 +10,32 @@ const router = Router();
 
 router.get(
   "/",
-  authentication({ tokenType: tokenTypeEnum.ACCESS }),
+  authentication({ tokenType: TokenTypeEnum.ACCESS }),
   async (req, res) => {
-    const data = await getProfile(req.payload.sub);
+    const data = await getProfile(req.user);
     return successResponse({ res, data });
   },
 );
 
 router.patch(
   "/",
-  authentication({ tokenType: tokenTypeEnum.ACCESS }),
+  authentication({ tokenType: TokenTypeEnum.ACCESS }),
   authorization({ accessRole: RoleEnum.ADMIN }),
   async (req, res) => {
-    const data = await updateProfile(req.payload.sub, req.body);
+    const data = await updateProfile(req.user, req.body);
     return successResponse({ res, data });
   },
 );
 
 router.post(
   "/rotate-token",
-  authentication({ tokenType: tokenTypeEnum.REFRESH }),
+  authentication({ tokenType: TokenTypeEnum.REFRESH }),
   async (req, res) => {
-    const data = await rotateToken(req.payload);
+    const data = await rotateToken({
+      payload: req.payload,
+      user: req.user,
+      issuer: `${req.protocol}://${req.host}`,
+    });
     return successResponse({ res, data });
   },
 );

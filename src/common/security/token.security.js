@@ -12,7 +12,7 @@ import {
   NotfoundException,
   UnauthorizedException,
 } from "../exceptions/index.js";
-import { RoleEnum, tokenTypeEnum } from "../enum/index.js";
+import { RoleEnum, TokenTypeEnum } from "../enum/index.js";
 import { findById } from "../repository/index.js";
 import { UserModel } from "../../DB/models/user.model.js";
 
@@ -30,21 +30,21 @@ const getTokenSignatures = ({ role = RoleEnum.USER }) => {
       };
 
     default:
-      throw BadRequestException("Invlaid user role");
+      throw BadRequestException("Invalid role");
   }
 };
 
 const getSignature = ({
-  tokenType = tokenTypeEnum.ACCESS,
+  tokenType = TokenTypeEnum.ACCESS,
   role = RoleEnum.USER,
 } = {}) => {
   const signatures = getTokenSignatures({ role });
 
   switch (tokenType) {
-    case tokenTypeEnum.ACCESS:
+    case TokenTypeEnum.ACCESS:
       return signatures.access_signature;
 
-    case tokenTypeEnum.REFRESH:
+    case TokenTypeEnum.REFRESH:
       return signatures.refresh_signature;
 
     default:
@@ -66,8 +66,8 @@ export const verifyToken = ({
 } = {}) => {
   try {
     return jwt.verify(token, secretKey, {
-      issuer: "my-api",
-      audience: "my-client",
+      issuer: "http://localhost:3000",
+      audience: [RoleEnum.USER, RoleEnum.ADMIN],
     });
   } catch (error) {
     throw UnauthorizedException("Invalid or expired token");
@@ -76,7 +76,7 @@ export const verifyToken = ({
 
 export const decodeToken = async ({
   token = "",
-  tokenType = tokenTypeEnum.ACCESS,
+  tokenType = TokenTypeEnum.ACCESS,
   role = RoleEnum.USER,
 } = {}) => {
   const secretKey = getSignature({
@@ -99,13 +99,17 @@ export const decodeToken = async ({
   });
 
   if (!user) {
-    throw NotfoundException("Invlaid user");
+    throw NotfoundException("Invalid user");
   }
 
   return { payload, user };
 };
 
-export const createLoginCredentials = async ({ user, options = {} }) => {
+export const createLoginCredentials = async ({
+  user,
+  issuer,
+  options = {},
+}) => {
   const { access_signature, refresh_signature } = getTokenSignatures({
     role: user.role,
   });
@@ -116,8 +120,8 @@ export const createLoginCredentials = async ({ user, options = {} }) => {
     options: {
       ...options,
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
-      issuer: "my-api",
-      audience: "my-client",
+      issuer,
+      audience: [user.role],
     },
   });
 
@@ -127,8 +131,8 @@ export const createLoginCredentials = async ({ user, options = {} }) => {
     options: {
       ...options,
       expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-      issuer: "my-api",
-      audience: "my-client",
+      issuer,
+      audience: [user.role],
     },
   });
 
