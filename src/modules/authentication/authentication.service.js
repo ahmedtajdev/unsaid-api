@@ -8,6 +8,8 @@ import { createOne, findOne } from "../../common/repository/index.js";
 import {
   compare,
   createLoginCredentials,
+  decrypt,
+  encrypt,
   hash,
 } from "../../common/security/index.js";
 import { OAuth2Client } from "google-auth-library";
@@ -74,7 +76,7 @@ export const signupWithGmail = async ({ idToken }) => {
   }
 };
 
-export const signup = async ({ username, email, password }) => {
+export const signup = async ({ username, email, password, phone }) => {
   try {
     const duplicatedUser = await findOne({
       model: UserModel,
@@ -92,6 +94,7 @@ export const signup = async ({ username, email, password }) => {
         username,
         email,
         password: await hash(password),
+        phone: await encrypt(phone),
       },
     });
 
@@ -118,6 +121,8 @@ export const login = async ({ email, password }, issuer) => {
     if (!match) {
       throw NotfoundException("Not Exist");
     }
+
+    user.phone = await decrypt(user.phone);
 
     return await createLoginCredentials({ user, issuer });
   } catch (error) {
