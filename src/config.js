@@ -6,6 +6,7 @@ export const PORT = parseInt(process.env.PORT ?? "9000");
 export const DB_URI = process.env.DB_URI;
 
 export const ENC_KEY = process.env.ENC_KEY;
+export const ENC_ALG = process.env.ENC_ALG;
 
 export const IV_LENGTH = parseInt(process.env.IV_LENGTH ?? "16");
 
