@@ -15,6 +15,20 @@ import {
 import { RoleEnum, TokenTypeEnum } from "../enum/index.js";
 import { findById } from "../repository/index.js";
 import { UserModel } from "../../DB/models/user.model.js";
+import { randomUUID } from "node:crypto";
+import { exists, set } from "../services/index.js";
+
+export const userBaseKey = ({ userId }) => {
+  return `User::${userId.toString()}`;
+};
+
+export const userBaseRevokeTokenKey = ({ userId }) => {
+  return `${userBaseKey({ userId })}::Revoke_Token`;
+};
+
+export const userRevokeTokenKey = ({ userId, jti }) => {
+  return `${userBaseRevokeTokenKey({ userId })}::${jti}`;
+};
 
 const getTokenSignatures = ({ role = RoleEnum.USER }) => {
   switch (role) {
@@ -93,6 +107,17 @@ export const decodeToken = async ({
     throw BadRequestException("Missing token payload");
   }
 
+  if (
+    await exists({
+      key: userRevokeTokenKey({
+        userId: payload.sub,
+        jti: payload.jti,
+      }),
+    })
+  ) {
+    throw UnauthorizedException("Expired login credentials");
+  }
+
   const user = await findById({
     model: UserModel,
     id: payload.sub,
@@ -100,6 +125,10 @@ export const decodeToken = async ({
 
   if (!user) {
     throw NotfoundException("Invalid user");
+  }
+
+  if ((user.changeCredentialsTime?.getTime() ?? 0) > payload.iat * 1000) {
+    throw UnauthorizedException("Expired login credentials");
   }
 
   return { payload, user };
@@ -113,6 +142,7 @@ export const createLoginCredentials = async ({
   const { access_signature, refresh_signature } = getTokenSignatures({
     role: user.role,
   });
+  const jti = randomUUID();
 
   const access_token = generateToken({
     payload: { sub: user._id, role: user.role },
@@ -122,6 +152,7 @@ export const createLoginCredentials = async ({
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
       issuer,
       audience: [user.role],
+      jti,
     },
   });
 
@@ -133,8 +164,27 @@ export const createLoginCredentials = async ({
       expiresIn: REFRESH_TOKEN_EXPIRES_IN,
       issuer,
       audience: [user.role],
+      jti,
     },
   });
 
   return { access_token, refresh_token };
+};
+
+export const createRevokeToken = async ({ payload }) => {
+  const consumedTime = Math.ceil(Date.now() / 1000) - payload.iat;
+  const refreshExpiresIn = payload.iat + REFRESH_TOKEN_EXPIRES_IN;
+  const ttl = refreshExpiresIn - consumedTime;
+
+  // SET IN REDIS
+  await set({
+    key: userRevokeTokenKey({
+      userId: payload.sub,
+      jti: payload.jti,
+    }),
+    value: payload.jti,
+    ttl,
+  });
+
+  return;
 };

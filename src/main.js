@@ -10,7 +10,7 @@ import { bootstrapDB } from "./DB/connection.db.js";
 import cors from "cors";
 
 const app = express();
-bootstrapDB(app, PORT);
+await bootstrapDB(app, PORT);
 
 app.use(cors());
 app.use(express.json());
