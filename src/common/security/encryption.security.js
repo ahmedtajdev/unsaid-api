@@ -14,7 +14,11 @@ export const encrypt = async (plainText) => {
 };
 
 export const decrypt = async (cipherText) => {
+  if (!cipherText) return null;
+
   const [hexIV, encrypted] = cipherText.split("::");
+
+  console.log({ hexIV, encrypted });
 
   const iv = Buffer.from(hexIV, "hex");
 

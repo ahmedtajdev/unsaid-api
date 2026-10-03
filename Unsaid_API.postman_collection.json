@@ -20,7 +20,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"username\": \"Ahmed Hamed\",\r\n  \"email\": \"ahmed52222@gmail.com\",\r\n   \"password\": \"12345678\"\r\n}",
+              "raw": "{\r\n  \"username\": \"Ahmed Hamed\",\r\n  \"email\": \"ahmed522@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"phone\": \"01234567890\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -44,15 +44,31 @@
         },
         {
           "name": "login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\npm.environment.set(\"BEARER_ACCESS_TOKEN\", response.data.access_token);\r\npm.environment.set(\"BEARER_REFRESH_TOKEN\", response.data.refresh_token);"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
             },
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "1"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"ahmed011@gmail.com\",\r\n    \"password\": \"ahmed@123\"\r\n}",
+              "raw": "{\r\n    \"email\": \"ahmed522@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -60,15 +76,149 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/auth/login",
+              "raw": "{{BASE_URL}}/auth/login",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "user",
+      "item": [
+        {
+          "name": "get authenticated user profile",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:3000/user",
               "protocol": "http",
               "host": [
                 "localhost"
               ],
               "port": "3000",
               "path": [
-                "auth",
-                "login"
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update authenticated user profile",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"phone\": null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/user",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "rotate token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_REFRESH_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/user/rotate-token",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "user",
+                "rotate-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"action\": 0\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3000/user/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3000",
+              "path": [
+                "user",
+                "logout"
               ]
             }
           },

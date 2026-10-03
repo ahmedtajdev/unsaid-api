@@ -142,7 +142,7 @@ export const createLoginCredentials = async ({
   const { access_signature, refresh_signature } = getTokenSignatures({
     role: user.role,
   });
-  const jti = randomUUID();
+  const jwtid = randomUUID();
 
   const access_token = generateToken({
     payload: { sub: user._id, role: user.role },
@@ -152,7 +152,7 @@ export const createLoginCredentials = async ({
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
       issuer,
       audience: [user.role],
-      jti,
+      jwtid,
     },
   });
 
@@ -164,7 +164,7 @@ export const createLoginCredentials = async ({
       expiresIn: REFRESH_TOKEN_EXPIRES_IN,
       issuer,
       audience: [user.role],
-      jti,
+      jwtid,
     },
   });
 

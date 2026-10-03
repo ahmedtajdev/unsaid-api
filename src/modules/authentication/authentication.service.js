@@ -94,7 +94,7 @@ export const signup = async ({ username, email, password, phone }) => {
         username,
         email,
         password: await hash(password),
-        phone: await encrypt(phone),
+        phone: phone ? await encrypt(phone) : undefined,
       },
     });
 
@@ -121,8 +121,6 @@ export const login = async ({ email, password }, issuer) => {
     if (!match) {
       throw NotfoundException("Not Exist");
     }
-
-    user.phone = await decrypt(user.phone);
 
     return await createLoginCredentials({ user, issuer });
   } catch (error) {

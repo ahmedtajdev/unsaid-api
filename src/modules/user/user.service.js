@@ -7,6 +7,7 @@ import { findByIdAndUpdate } from "../../common/repository/index.js";
 import {
   createLoginCredentials,
   createRevokeToken,
+  decrypt,
   userBaseRevokeTokenKey,
 } from "../../common/security/index.js";
 import { del, keys } from "../../common/services/index.js";
@@ -14,7 +15,11 @@ import { ACCESS_TOKEN_EXPIRES_IN } from "../../config.js";
 import { UserModel } from "../../DB/models/index.js";
 
 export const getProfile = async (user) => {
-  return user;
+  const profile = user.toObject();
+
+  profile.phone = await decrypt(profile.phone);
+
+  return profile;
 };
 
 export const updateProfile = async (user, update) => {

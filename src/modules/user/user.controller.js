@@ -25,7 +25,6 @@ router.get(
 router.patch(
   "/",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
-  authorization({ accessRole: RoleEnum.ADMIN }),
   async (req, res) => {
     const data = await updateProfile(req.user, req.body);
     return successResponse({ res, data });
@@ -49,12 +48,12 @@ router.post(
   "/logout",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
   async (req, res) => {
-    const data = await logout({
+    await logout({
       payload: req.payload,
       user: req.user,
       action: req.body.action,
     });
-    return successResponse({ res, data });
+    return successResponse({ res });
   },
 );
 
