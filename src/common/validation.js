@@ -47,6 +47,9 @@ export const generalValidationFields = {
       message: getValidationMessage("email", lang),
     });
   },
+  otp: (lang = LanguageEnum.EN) => {
+    return z.string().regex(/^\d{6}$/, { error: "Invalid code" });
+  },
   password: (lang = LanguageEnum.EN) => {
     return z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, {
       message: getValidationMessage("password", lang),

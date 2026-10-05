@@ -3,6 +3,15 @@ import { config } from "dotenv";
 config({ path: resolve(`.env.${process.env.NODE_ENV ?? "development"}`) });
 
 export const PORT = parseInt(process.env.PORT ?? "9000");
+
+export const APP_PASSWORD = process.env.APP_PASSWORD;
+export const APP_EMAIL = process.env.APP_EMAIL;
+export const APPLICATION_NAME = process.env.APPLICATION_NAME;
+
+export const TWITTER = process.env.TWITTER;
+export const INSTAGRAM = process.env.INSTAGRAM;
+export const FACEBOOK = process.env.FACEBOOK;
+
 export const DB_URI = process.env.DB_URI;
 export const REDIS_URI = process.env.REDIS_URI;
 

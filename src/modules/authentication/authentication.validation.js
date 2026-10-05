@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { email, z } from "zod";
 import { LanguageEnum } from "../../common/enum/index.js";
 import { generalValidationFields } from "../../common/validation.js";
 
@@ -42,3 +42,45 @@ export const signup = (lang = LanguageEnum.EN) =>
         }
       }),
   });
+
+export const resendEmailOtp = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: z.strictObject({
+      email: generalValidationFields.email(lang),
+    }),
+  });
+
+export const forgotPassword = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: z.strictObject({
+      email: generalValidationFields.email(lang),
+    }),
+  });
+
+export const confirmEmail = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: z.strictObject({
+      email: generalValidationFields.email(lang),
+      otp: generalValidationFields.otp(lang),
+    }),
+  });
+
+export const resetForgotPassword = (lang = LanguageEnum.EN) =>
+  z
+    .object({
+      body: z.strictObject({
+        email: generalValidationFields.email(lang),
+        otp: generalValidationFields.otp(lang),
+        password: generalValidationFields.password(lang),
+        confirmPassword: generalValidationFields.password(lang),
+      }),
+    })
+    .superRefine((data, ctx) => {
+      generalValidationFields.matchFields({
+        original: "password",
+        copy: "confirmPassword",
+        data,
+        ctx,
+        lang,
+      });
+    });

@@ -14,6 +14,18 @@ export const ConflictException = (message = "conflict", issues = {}) => {
   });
 };
 
+export const TooManyRequestsException = (
+  message = "Too Many Requests",
+  issues = {},
+) => {
+  return ApplicationException({
+    message,
+    options: {
+      cause: { status: 409, issues },
+    },
+  });
+};
+
 export const NotfoundException = (message = "Notfound", issues = {}) => {
   return ApplicationException({
     message,
