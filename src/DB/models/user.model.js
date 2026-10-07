@@ -32,6 +32,7 @@ const userSchema = new mongoose.Schema(
     image: String,
     coverImage: [String],
     changeCredentialsTime: Date,
+    isTwoStepVerificationEnabled: Boolean,
     gender: {
       type: Number,
       enum: Object.values(GenderEnum),

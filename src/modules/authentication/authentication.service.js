@@ -93,7 +93,7 @@ export const signupWithGmail = async ({ idToken }) => {
   }
 };
 
-const sendEmailOtp = async ({
+export const sendEmailOtp = async ({
   email,
   subject,
   title,
@@ -101,47 +101,54 @@ const sendEmailOtp = async ({
   maxTrials = 3,
   blockInSeconds = 300,
 }) => {
-  const existOtp_TTL = await ttl({ key: userEmailKey({ email, subject }) });
+  try {
+    const existOtp_TTL = await ttl({ key: userEmailKey({ email, subject }) });
 
-  if (existOtp_TTL > 0) {
-    throw ConflictException(
-      `Sorry we cannot create new OTP while existin one still valid. Please try again later after ${existOtp_TTL}s`,
-    );
-  }
+    if (existOtp_TTL > 0) {
+      throw ConflictException(
+        `Sorry we cannot create new OTP while existing one still valid. Please try again later after ${existOtp_TTL}s`,
+      );
+    }
 
-  const oldTrials =
-    (await get({ key: userEmailTrialsKey({ email, subject }) })) ?? 0;
+    const oldTrials =
+      (await get({ key: userEmailTrialsKey({ email, subject }) })) ?? 0;
 
-  if (oldTrials >= maxTrials) {
-    throw TooManyRequestsException("Max OTP trials have been reached");
-  }
+    if (oldTrials >= maxTrials) {
+      throw TooManyRequestsException(
+        `Max OTP trials have been reached, please try again after ${await ttl({ key: userEmailTrialsKey({ email, subject }) })}s`,
+      );
+    }
 
-  const code = createOtp();
+    const code = createOtp();
 
-  await set({
-    key: userEmailKey({ email, subject }),
-    value: await hash(code.toString()),
-    ttl: expiresIn,
-  });
-
-  const currentTrials = await incBy({
-    key: userEmailTrialsKey({ email, subject }),
-  });
-
-  if (currentTrials === maxTrials) {
-    await expire({
-      key: userEmailTrialsKey({ email, subject }),
-      ttl: blockInSeconds,
+    await set({
+      key: userEmailKey({ email, subject }),
+      value: await hash(code.toString()),
+      ttl: expiresIn,
     });
+
+    const currentTrials = await incBy({
+      key: userEmailTrialsKey({ email, subject }),
+    });
+
+    if (currentTrials === maxTrials) {
+      await expire({
+        key: userEmailTrialsKey({ email, subject }),
+        ttl: blockInSeconds,
+      });
+    }
+
+    emailEvent.emit("sendEmail", {
+      recipients: { to: email },
+      subject,
+      data: { code, title: title ?? subject, expiresIn },
+    });
+
+    return;
+  } catch (error) {
+    console.log({ error });
+    throw error;
   }
-
-  emailEvent.emit("sendEmail", {
-    recipients: { to: email },
-    subject,
-    data: { code, title: title ?? subject },
-  });
-
-  return;
 };
 
 export const signup = async ({ username, email, password, phone }) => {
@@ -326,10 +333,6 @@ export const resetForgotPassword = async ({ otp, email, password }) => {
   return;
 };
 
-export const userLoginTrialsKey = ({ email }) => {
-  return `User::${email.trim().toLowerCase()}::Login_Trials`;
-};
-
 export const login = async (
   { email, password },
   { issuer, maxTrials = 5, blockInSeconds = 300 },
@@ -348,25 +351,27 @@ export const login = async (
       throw NotfoundException("Invalid email or password");
     }
 
+    const userLoginTrialsKey = `User::${email.trim().toLowerCase()}::Login_Trials`;
+
     const oldTrials =
       (await get({
-        key: userLoginTrialsKey({ email }),
+        key: userLoginTrialsKey,
       })) ?? 0;
 
     if (oldTrials >= maxTrials) {
       throw TooManyRequestsException(
-        `Max login trials have been reached, please try again after ${await ttl({ key: userLoginTrialsKey({ email }) })}s`,
+        `Max login trials have been reached, please try again after ${await ttl({ key: userLoginTrialsKey })}s`,
       );
     }
 
     const match = await compare(password, user.password);
 
     if (!match) {
-      const currentTrials = await incBy({ key: userLoginTrialsKey({ email }) });
+      const currentTrials = await incBy({ key: userLoginTrialsKey });
 
       if (currentTrials === maxTrials) {
         await expire({
-          key: userLoginTrialsKey({ email }),
+          key: userLoginTrialsKey,
           ttl: blockInSeconds,
         });
       }
@@ -374,7 +379,58 @@ export const login = async (
       throw NotfoundException("Invalid email or password");
     }
 
-    await del({ key: userLoginTrialsKey({ email }) });
+    await del({ key: userLoginTrialsKey });
+
+    if (user.isTwoStepVerificationEnabled) {
+      await sendEmailOtp({
+        email,
+        subject: EmailSubjectEnum.LOGIN_CONFIRMATION,
+        title: EmailTitleEnum.LOGIN_CONFIRMATION,
+      });
+      return;
+    }
+
+    return await createLoginCredentials({ user, issuer });
+  } catch (error) {
+    console.log({ error });
+    throw error;
+  }
+};
+
+export const loginConfirmation = async ({ otp, email }, { issuer }) => {
+  try {
+    const user = await findOne({
+      model: UserModel,
+      filter: {
+        email,
+        provider: ProviderEnum.SYSTEM,
+        confirmEmail: { $exists: true },
+      },
+    });
+
+    if (!user) {
+      throw NotfoundException("Invalid account");
+    }
+
+    const hashOtp = await get({
+      key: userEmailKey({
+        email,
+        subject: EmailSubjectEnum.LOGIN_CONFIRMATION,
+      }),
+    });
+
+    if (!hashOtp || !(await compare(otp, hashOtp))) {
+      throw ConflictException("Invalid OTP");
+    }
+
+    await del({
+      key: await keys({
+        prefix: userEmailKey({
+          email,
+          subject: EmailSubjectEnum.LOGIN_CONFIRMATION,
+        }),
+      }),
+    });
 
     return await createLoginCredentials({ user, issuer });
   } catch (error) {

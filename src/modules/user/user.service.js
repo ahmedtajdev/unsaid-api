@@ -1,3 +1,4 @@
+import { EmailSubjectEnum, EmailTitleEnum } from "../../common/enum/index.js";
 import { LogoutEnum } from "../../common/enum/security.enum.js";
 import {
   BadRequestException,
@@ -5,14 +6,17 @@ import {
 } from "../../common/exceptions/index.js";
 import { findByIdAndUpdate } from "../../common/repository/index.js";
 import {
+  compare,
   createLoginCredentials,
   createRevokeToken,
   decrypt,
   userBaseRevokeTokenKey,
 } from "../../common/security/index.js";
-import { del, keys } from "../../common/services/index.js";
+import { del, get, keys } from "../../common/services/index.js";
+import { userEmailKey, userEmailTrialsKey } from "../../common/utils/index.js";
 import { ACCESS_TOKEN_EXPIRES_IN } from "../../config.js";
 import { UserModel } from "../../DB/models/index.js";
+import { sendEmailOtp } from "../authentication/index.js";
 
 export const getProfile = async (user) => {
   const profile = user.toObject();
@@ -45,6 +49,61 @@ export const rotateToken = async ({ payload, user, issuer } = {}) => {
   const data = await createLoginCredentials({ user, issuer });
   await createRevokeToken({ payload });
   return data;
+};
+
+export const enableTwoStepVerification = async (user) => {
+  try {
+    if (user.isTwoStepVerificationEnabled) {
+      throw ConflictException("Two Step Verification already enabled");
+    }
+
+    await sendEmailOtp({
+      email: user.email,
+      subject: EmailSubjectEnum.ENABLE_TWO_STEP_VERIFICATION,
+      title: EmailTitleEnum.ENABLE_TWO_STEP_VERIFICATION,
+    });
+
+    return;
+  } catch (error) {
+    console.log({ error });
+    throw error;
+  }
+};
+
+export const verifyEnableTwoStepVerificationCode = async (user, body) => {
+  try {
+    const { otp } = body;
+    console.log({ otp });
+    const hashOtp = await get({
+      key: userEmailKey({
+        email: user.email,
+        subject: EmailSubjectEnum.ENABLE_TWO_STEP_VERIFICATION,
+      }),
+    });
+
+    console.log({ hashOtp });
+
+    if (!hashOtp || !(await compare(otp, hashOtp))) {
+      throw ConflictException("Invalid OTP");
+    }
+
+    user.isTwoStepVerificationEnabled = true;
+    await user.save();
+
+    await del({
+      key: await keys({
+        prefix: userEmailKey({
+          email: user.email,
+          subject: EmailSubjectEnum.ENABLE_TWO_STEP_VERIFICATION,
+        }),
+      }),
+    });
+
+    return;
+  } catch (error) {
+    console.log({ error });
+    throw error;
+  }
 };
 
 export const logout = async ({

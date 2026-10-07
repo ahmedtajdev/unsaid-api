@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { sendEmail } from "./send.email.js";
-import { verifyEmailTemplate } from "./templates.email.js";
+import { sendEmailTemplate } from "./templates.email.js";
 
 export const emailEvent = new EventEmitter();
 
@@ -9,10 +9,11 @@ emailEvent.on("sendEmail", async ({ recipients, subject, data }) => {
     await sendEmail({
       ...recipients,
       subject,
-      html: verifyEmailTemplate({
+      html: sendEmailTemplate({
         code: data.code,
         subject,
         title: data.title,
+        expiresIn: data.expiresIn,
       }),
     });
   } catch (error) {

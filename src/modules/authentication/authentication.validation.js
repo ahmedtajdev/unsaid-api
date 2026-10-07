@@ -1,4 +1,4 @@
-import { email, z } from "zod";
+import { z } from "zod";
 import { LanguageEnum } from "../../common/enum/index.js";
 import { generalValidationFields } from "../../common/validation.js";
 
@@ -61,6 +61,13 @@ export const confirmEmail = (lang = LanguageEnum.EN) =>
   z.object({
     body: z.strictObject({
       email: generalValidationFields.email(lang),
+      otp: generalValidationFields.otp(lang),
+    }),
+  });
+
+export const otp = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: z.strictObject({
       otp: generalValidationFields.otp(lang),
     }),
   });

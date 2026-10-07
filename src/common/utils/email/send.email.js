@@ -3,7 +3,7 @@ import { APP_EMAIL, APP_PASSWORD, APPLICATION_NAME } from "../../../config.js";
 import { BadRequestException } from "../../exceptions/index.js";
 
 export const userEmailKey = ({ email, subject }) => {
-  return `User::${email}::${subject}OTP`;
+  return `User::${email.trim().toLowerCase()}::${subject}_OTP`;
 };
 
 export const userEmailTrialsKey = ({ email, subject }) => {

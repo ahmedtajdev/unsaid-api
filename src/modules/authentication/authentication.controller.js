@@ -4,6 +4,7 @@ import {
   confirmEmail,
   forgotPassword,
   login,
+  loginConfirmation,
   resendEmailOtp,
   resetForgotPassword,
   signup,
@@ -24,6 +25,15 @@ router.post("/signup", validation(validators.signup), async (req, res) => {
   const data = await signup(req.validate.body);
   return successResponse({ res, status: 201, data });
 });
+
+router.post(
+  "/resend-email-otp",
+  validation(validators.resendEmailOtp),
+  async (req, res) => {
+    await resendEmailOtp(req.validate.body);
+    return successResponse({ res });
+  },
+);
 
 router.post(
   "/confirm-email",
@@ -61,20 +71,22 @@ router.patch(
   },
 );
 
-router.post(
-  "/resend-email-otp",
-  validation(validators.resendEmailOtp),
-  async (req, res) => {
-    await resendEmailOtp(req.validate.body);
-    return successResponse({ res });
-  },
-);
-
 router.post("/login", validation(validators.login), async (req, res) => {
   const data = await login(req.validate.body, {
     issuer: `${req.protocol}://${req.host}`,
   });
   return successResponse({ res, data });
 });
+
+router.post(
+  "/login-confirmation",
+  validation(validators.confirmEmail),
+  async (req, res) => {
+    const data = await loginConfirmation(req.validate.body, {
+      issuer: `${req.protocol}://${req.host}`,
+    });
+    return successResponse({ res, data });
+  },
+);
 
 export default router;
