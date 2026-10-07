@@ -22,7 +22,7 @@ import {
   userEmailKey,
   userEmailTrialsKey,
 } from "../../common/utils/index.js";
-import { EmailSubjectEnum } from "../../common/enum/index.js";
+import { EmailSubjectEnum, EmailTitleEnum } from "../../common/enum/index.js";
 import {
   del,
   expire,
@@ -112,8 +112,6 @@ const sendEmailOtp = async ({
   const oldTrials =
     (await get({ key: userEmailTrialsKey({ email, subject }) })) ?? 0;
 
-  console.log({ oldTrials });
-
   if (oldTrials >= maxTrials) {
     throw TooManyRequestsException("Max OTP trials have been reached");
   }
@@ -130,7 +128,7 @@ const sendEmailOtp = async ({
     key: userEmailTrialsKey({ email, subject }),
   });
 
-  if (currentTrials === 3) {
+  if (currentTrials === maxTrials) {
     await expire({
       key: userEmailTrialsKey({ email, subject }),
       ttl: blockInSeconds,
@@ -142,6 +140,8 @@ const sendEmailOtp = async ({
     subject,
     data: { code, title: title ?? subject },
   });
+
+  return;
 };
 
 export const signup = async ({ username, email, password, phone }) => {
@@ -168,7 +168,7 @@ export const signup = async ({ username, email, password, phone }) => {
     await sendEmailOtp({
       email,
       subject: EmailSubjectEnum.CONFIRM_EMAIL,
-      title: "Confirm Your Email",
+      title: EmailTitleEnum.CONFIRM_EMAIL,
     });
 
     return user;
@@ -196,7 +196,7 @@ export const resendEmailOtp = async ({ email }) => {
     await sendEmailOtp({
       email,
       subject: EmailSubjectEnum.CONFIRM_EMAIL,
-      title: "Confirm Your Email",
+      title: EmailTitleEnum.CONFIRM_EMAIL,
     });
 
     return;
@@ -224,7 +224,7 @@ export const forgotPassword = async ({ email }) => {
     await sendEmailOtp({
       email,
       subject: EmailSubjectEnum.FORGOT_PASSWORD,
-      title: "Reset Passord",
+      title: EmailTitleEnum.FORGOT_PASSWORD,
     });
     return;
   } catch (error) {
@@ -326,7 +326,14 @@ export const resetForgotPassword = async ({ otp, email, password }) => {
   return;
 };
 
-export const login = async ({ email, password }, issuer) => {
+export const userLoginTrialsKey = ({ email }) => {
+  return `User::${email.trim().toLowerCase()}::Login_Trials`;
+};
+
+export const login = async (
+  { email, password },
+  { issuer, maxTrials = 5, blockInSeconds = 300 },
+) => {
   try {
     const user = await findOne({
       model: UserModel,
@@ -338,14 +345,36 @@ export const login = async ({ email, password }, issuer) => {
     });
 
     if (!user) {
-      throw NotfoundException("Not Exist");
+      throw NotfoundException("Invalid email or password");
+    }
+
+    const oldTrials =
+      (await get({
+        key: userLoginTrialsKey({ email }),
+      })) ?? 0;
+
+    if (oldTrials >= maxTrials) {
+      throw TooManyRequestsException(
+        `Max login trials have been reached, please try again after ${await ttl({ key: userLoginTrialsKey({ email }) })}s`,
+      );
     }
 
     const match = await compare(password, user.password);
 
     if (!match) {
-      throw NotfoundException("Not Exist");
+      const currentTrials = await incBy({ key: userLoginTrialsKey({ email }) });
+
+      if (currentTrials === maxTrials) {
+        await expire({
+          key: userLoginTrialsKey({ email }),
+          ttl: blockInSeconds,
+        });
+      }
+
+      throw NotfoundException("Invalid email or password");
     }
+
+    await del({ key: userLoginTrialsKey({ email }) });
 
     return await createLoginCredentials({ user, issuer });
   } catch (error) {

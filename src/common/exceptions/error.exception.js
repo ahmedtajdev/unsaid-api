@@ -21,7 +21,7 @@ export const TooManyRequestsException = (
   return ApplicationException({
     message,
     options: {
-      cause: { status: 409, issues },
+      cause: { status: 429, issues },
     },
   });
 };

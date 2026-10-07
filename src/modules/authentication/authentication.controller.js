@@ -71,7 +71,9 @@ router.post(
 );
 
 router.post("/login", validation(validators.login), async (req, res) => {
-  const data = await login(req.validate.body, `${req.protocol}://${req.host}`);
+  const data = await login(req.validate.body, {
+    issuer: `${req.protocol}://${req.host}`,
+  });
   return successResponse({ res, data });
 });
 
