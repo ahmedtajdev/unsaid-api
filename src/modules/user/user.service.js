@@ -73,15 +73,12 @@ export const enableTwoStepVerification = async (user) => {
 export const verifyEnableTwoStepVerificationCode = async (user, body) => {
   try {
     const { otp } = body;
-    console.log({ otp });
     const hashOtp = await get({
       key: userEmailKey({
         email: user.email,
         subject: EmailSubjectEnum.ENABLE_TWO_STEP_VERIFICATION,
       }),
     });
-
-    console.log({ hashOtp });
 
     if (!hashOtp || !(await compare(otp, hashOtp))) {
       throw ConflictException("Invalid OTP");

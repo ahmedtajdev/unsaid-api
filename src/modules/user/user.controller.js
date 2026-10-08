@@ -7,12 +7,37 @@ import {
   updateProfile,
   verifyEnableTwoStepVerificationCode,
 } from "./user.service.js";
-import { successResponse } from "../../common/utils/index.js";
-import { authentication, validation } from "../../middleware/index.js";
+import {
+  fileValidation,
+  localFileUplaod,
+  successResponse,
+} from "../../common/utils/index.js";
+import {
+  authentication,
+  fileUploadMiddleware,
+  validation,
+} from "../../middleware/index.js";
 import { TokenTypeEnum } from "../../common/enum/security.enum.js";
 import * as validators from "../authentication/index.js";
 
 const router = Router();
+
+router.patch(
+  "/profile-image",
+  authentication({ tokenType: TokenTypeEnum.ACCESS }),
+  fileUploadMiddleware({
+    multerMiddleware: localFileUplaod({
+      maxFileSizeMB: 5,
+    }).single("attachment"),
+    customPath: "users/profile",
+    validation: fileValidation.image,
+  }),
+  async (req, res) => {
+    req.user.image = req.file.finalPath;
+    await req.user.save();
+    return successResponse({ res, data: { user: req.user } });
+  },
+);
 
 router.get(
   "/",
@@ -68,24 +93,15 @@ router.post(
 );
 
 router.post(
-  "/verify-forgot-password",
-  validation(validators.confirmEmail),
-  async (req, res) => {
-    const data = await validators.verifyForgotPasswordCode(req.validate.body);
-    return successResponse({ res, data });
-  },
-);
-
-router.post(
   "/logout",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
   async (req, res) => {
-    await logout({
+    const data = await logout({
       payload: req.payload,
       user: req.user,
       action: req.body.action,
     });
-    return successResponse({ res });
+    return successResponse({ res, data });
   },
 );
 
