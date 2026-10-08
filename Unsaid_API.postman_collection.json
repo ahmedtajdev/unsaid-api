@@ -20,7 +20,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"username\": \"Ahmed Hamed\",\r\n  \"email\": \"ahmed522@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"phone\": \"01234567890\"\r\n}",
+              "raw": "{\r\n  \"username\": \"Ahmed Hamed\",\r\n  \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"phone\": \"01234567890\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -28,12 +28,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/auth/signup",
-              "protocol": "http",
+              "raw": "{{BASE_URL}}/auth/signup",
               "host": [
-                "localhost"
+                "{{BASE_URL}}"
               ],
-              "port": "3000",
               "path": [
                 "auth",
                 "signup"
@@ -50,7 +48,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "let response = pm.response.json();\r\npm.environment.set(\"BEARER_ACCESS_TOKEN\", response.data.access_token);\r\npm.environment.set(\"BEARER_REFRESH_TOKEN\", response.data.refresh_token);"
+                  "let response = pm.response.json();\nif(response.data) {\n    if(response.data.access_token) {\n        pm.environment.set(\"BEARER_ACCESS_TOKEN\", response.data.access_token);\n    }\n    if(response.data.refresh_token) {\n        pm.environment.set(\"BEARER_REFRESH_TOKEN\", response.data.refresh_token);\n    }\n}\n\npm.test(\"Status code is 200\", function () {\n    pm.response.to.have.status(200);\n});\n\npm.test(\"Response has message Done\", function () {\n    pm.expect(response.message).to.eql(\"Done\");\n});\n"
                 ]
               }
             }
@@ -68,7 +66,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"ahmed522@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\"\r\n}",
+              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -83,6 +81,179 @@
               "path": [
                 "auth",
                 "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "confirm-email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n    \"otp\": \"347182\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/confirm-email",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "confirm-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "resend-email-otp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n     \"email\": \"midotajj@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/resend-email-otp",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "resend-email-otp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n   \"email\": \"midotajj@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/forgot-password",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify-forgot-password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n    \"otp\": \"171750\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/verify-forgot-password",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "verify-forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reset-forgot-password",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"otp\": \"171750\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/reset-forgot-password",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "reset-forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login-confirmation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\npm.environment.set(\"BEARER_ACCESS_TOKEN\", response.data.access_token);\r\npm.environment.set(\"BEARER_REFRESH_TOKEN\", response.data.refresh_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"email\": \"midotajj@gmail.com\",\r\n  \"otp\": \"205093\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/auth/login-confirmation",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "auth",
+                "login-confirmation"
               ]
             }
           },
@@ -107,12 +278,10 @@
               }
             ],
             "url": {
-              "raw": "http://localhost:3000/user",
-              "protocol": "http",
+              "raw": "{{BASE_URL}}/user",
               "host": [
-                "localhost"
+                "{{BASE_URL}}"
               ],
-              "port": "3000",
               "path": [
                 "user"
               ]
@@ -143,12 +312,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/user",
-              "protocol": "http",
+              "raw": "{{BASE_URL}}/user",
               "host": [
-                "localhost"
+                "{{BASE_URL}}"
               ],
-              "port": "3000",
               "path": [
                 "user"
               ]
@@ -158,6 +325,17 @@
         },
         {
           "name": "rotate token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();\r\npm.environment.set(\"BEARER_ACCESS_TOKEN\", response.data.access_token);\r\npm.environment.set(\"BEARER_REFRESH_TOKEN\", response.data.refresh_token);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -176,12 +354,10 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/user/rotate-token",
-              "protocol": "http",
+              "raw": "{{BASE_URL}}/user/rotate-token",
               "host": [
-                "localhost"
+                "{{BASE_URL}}"
               ],
-              "port": "3000",
               "path": [
                 "user",
                 "rotate-token"
@@ -202,7 +378,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"action\": 0\r\n}",
+              "raw": "{\r\n    \"action\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -210,15 +386,112 @@
               }
             },
             "url": {
-              "raw": "http://localhost:3000/user/logout",
-              "protocol": "http",
+              "raw": "{{BASE_URL}}/user/logout",
               "host": [
-                "localhost"
+                "{{BASE_URL}}"
               ],
-              "port": "3000",
               "path": [
                 "user",
                 "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "enable-two-step-verification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"username\": \"Ahmed Hamed\",\r\n  \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"phone\": \"01234567890\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/user/enable-two-step-verification",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "user",
+                "enable-two-step-verification"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "verify-enable-two-step-verification-code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"otp\": \"723584\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/user/verify-enable-two-step-verification-code",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "user",
+                "verify-enable-two-step-verification-code"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "profile-image",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachment",
+                  "type": "file",
+                  "src": [
+                    "/C:/Users/asus/Pictures/Screenshots/Screenshot (219).png"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/user/profile-image",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "user",
+                "profile-image"
               ]
             }
           },
