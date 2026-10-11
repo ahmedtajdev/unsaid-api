@@ -26,6 +26,41 @@ export const find = async ({ model, filter = {}, options = {} } = {}) => {
   return query.exec();
 };
 
+export const paginate = async ({
+  model,
+  filter = {},
+  page = 1,
+  limit = 5,
+  options = {},
+} = {}) => {
+  const currentPage = Math.max(1, Number(page) || 1);
+  const pageLimit = Math.max(5, Number(limit) || 5);
+
+  const [docsCount, docs] = await Promise.all([
+    countDocuments({
+      model,
+      filter,
+    }),
+    find({
+      model,
+      filter,
+      options: {
+        ...options,
+        skip: (currentPage - 1) * pageLimit,
+        pageLimit,
+      },
+    }),
+  ]);
+
+  return {
+    docsCount,
+    limit: pageLimit,
+    totalPages: Math.ceil(docsCount / pageLimit),
+    currentPage,
+    docs,
+  };
+};
+
 export const findOne = async ({ model, filter = {}, options = {} } = {}) => {
   const query = model.findOne(filter);
 
@@ -107,6 +142,6 @@ export const findOneAndDelete = async ({ model, filter = {} } = {}) => {
   return await model.findOneAndDelete(filter).exec();
 };
 
-export const count = async ({ model, filter = {} } = {}) => {
+export const countDocuments = async ({ model, filter = {} } = {}) => {
   return await model.countDocuments(filter).exec();
 };

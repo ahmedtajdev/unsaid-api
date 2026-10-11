@@ -144,7 +144,7 @@ export const sendEmailOtp = async ({
       data: { code, title: title ?? subject, expiresIn },
     });
 
-    return;
+    return "OTP sent to your email, please check your email and verify the OTP";
   } catch (error) {
     console.log({ error });
     throw error;
@@ -172,13 +172,11 @@ export const signup = async ({ username, email, password, phone }) => {
       },
     });
 
-    await sendEmailOtp({
+    return await sendEmailOtp({
       email,
       subject: EmailSubjectEnum.CONFIRM_EMAIL,
       title: EmailTitleEnum.CONFIRM_EMAIL,
     });
-
-    return user;
   } catch (error) {
     console.log({ error });
     throw error;
@@ -200,13 +198,11 @@ export const resendEmailOtp = async ({ email }) => {
       throw NotfoundException("Invalid account");
     }
 
-    await sendEmailOtp({
+    return await sendEmailOtp({
       email,
       subject: EmailSubjectEnum.CONFIRM_EMAIL,
       title: EmailTitleEnum.CONFIRM_EMAIL,
     });
-
-    return;
   } catch (error) {
     console.log({ error });
     throw error;
@@ -228,12 +224,11 @@ export const forgotPassword = async ({ email }) => {
       throw NotfoundException("Invalid account");
     }
 
-    await sendEmailOtp({
+    return await sendEmailOtp({
       email,
       subject: EmailSubjectEnum.FORGOT_PASSWORD,
       title: EmailTitleEnum.FORGOT_PASSWORD,
     });
-    return;
   } catch (error) {
     console.log({ error });
     throw error;
@@ -273,7 +268,7 @@ export const confirmEmail = async ({ otp, email }) => {
         }),
       }),
     });
-    return;
+    return "Email confirmed successfully";
   } catch (error) {
     console.log({ error });
     throw error;
@@ -303,7 +298,7 @@ export const verifyForgotPasswordCode = async ({ otp, email }) => {
       throw ConflictException("Invalid OTP");
     }
 
-    return user;
+    return "OTP verified successfully";
   } catch (error) {
     console.log({ error });
     throw error;
@@ -330,7 +325,7 @@ export const resetForgotPassword = async ({ otp, email, password }) => {
 
   await del({ key: [...result[0], ...result[1]] });
 
-  return;
+  return "Password reset successfully";
 };
 
 export const login = async (

@@ -18,8 +18,6 @@ export const decrypt = async (cipherText) => {
 
   const [hexIV, encrypted] = cipherText.split("::");
 
-  console.log({ hexIV, encrypted });
-
   const iv = Buffer.from(hexIV, "hex");
 
   const decipheriv = crypto.createDecipheriv(ENC_ALG, ENC_KEY, iv);

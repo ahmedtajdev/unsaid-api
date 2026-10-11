@@ -6,7 +6,7 @@ import { fileTypeFromBuffer } from "file-type";
 import { BadRequestException } from "../../exceptions/index.js";
 import { get, set } from "../../services/index.js";
 
-export const localFileUplaod = ({ maxFileSizeMB = 5 } = {}) => {
+export const localFileUpload = ({ maxFileSizeMB = 5 } = {}) => {
   const storage = multer.memoryStorage();
 
   return multer({
@@ -48,13 +48,13 @@ const deleteFile = async (filePath) => {
 
 const deleteFiles = async (files = []) => {
   for (const file of files) {
-    await deleteFile(file.finalPath);
+    await deleteFile(file.path);
   }
 };
 
 const saveFile = async ({ file, uniqueFilePath }) => {
   await writeFile(resolve(uniqueFilePath), file.buffer);
-  file.finalPath = uniqueFilePath;
+  file.path = uniqueFilePath;
   return file;
 };
 
@@ -71,7 +71,7 @@ const uploadProfileImage = async ({ user, file, uniqueFilePath }) => {
 
   await set({
     key,
-    value: file.finalPath,
+    value: file.path,
   });
   return file;
 };

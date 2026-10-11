@@ -4,12 +4,13 @@ import {
   getProfile,
   logout,
   rotateToken,
+  updatePassword,
   updateProfile,
   verifyEnableTwoStepVerificationCode,
 } from "./user.service.js";
 import {
   fileValidation,
-  localFileUplaod,
+  localFileUpload,
   successResponse,
 } from "../../common/utils/index.js";
 import {
@@ -20,22 +21,40 @@ import {
 import { TokenTypeEnum } from "../../common/enum/security.enum.js";
 import * as validators from "../authentication/index.js";
 
-const router = Router();
+const router = Router({
+  strict: true,
+  caseSensitive: true,
+  mergeParams: true,
+});
 
 router.patch(
   "/profile-image",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
   fileUploadMiddleware({
-    multerMiddleware: localFileUplaod({
+    multerMiddleware: localFileUpload({
       maxFileSizeMB: 5,
     }).single("attachment"),
     customPath: "users/profile",
     validation: fileValidation.image,
   }),
   async (req, res) => {
-    req.user.image = req.file.finalPath;
+    req.user.image = req.file.path;
     await req.user.save();
     return successResponse({ res, data: { user: req.user } });
+  },
+);
+
+router.patch(
+  "/update-password",
+  authentication({ tokenType: TokenTypeEnum.ACCESS }),
+  validation(validators.updatePassword),
+  async (req, res) => {
+    const message = await updatePassword(
+      req.user,
+      req.payload,
+      req.validated.body,
+    );
+    return successResponse({ res, message });
   },
 );
 
@@ -51,8 +70,9 @@ router.get(
 router.patch(
   "/",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
+  validation(validators.updateProfile),
   async (req, res) => {
-    const data = await updateProfile(req.user, req.body);
+    const data = await updateProfile(req.user, req.validated.body);
     return successResponse({ res, data });
   },
 );
@@ -74,8 +94,8 @@ router.post(
   "/enable-two-step-verification",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
   async (req, res) => {
-    const data = await enableTwoStepVerification(req.user);
-    return successResponse({ res, data });
+    const message = await enableTwoStepVerification(req.user);
+    return successResponse({ res, message });
   },
 );
 
@@ -84,11 +104,11 @@ router.post(
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
   validation(validators.otp),
   async (req, res) => {
-    const data = await verifyEnableTwoStepVerificationCode(
+    const message = await verifyEnableTwoStepVerificationCode(
       req.user,
-      req.validate.body,
+      req.validated.body,
     );
-    return successResponse({ res, data });
+    return successResponse({ res, message });
   },
 );
 
@@ -96,12 +116,12 @@ router.post(
   "/logout",
   authentication({ tokenType: TokenTypeEnum.ACCESS }),
   async (req, res) => {
-    const data = await logout({
+    const message = await logout({
       payload: req.payload,
       user: req.user,
       action: req.body.action,
     });
-    return successResponse({ res, data });
+    return successResponse({ res, message });
   },
 );
 

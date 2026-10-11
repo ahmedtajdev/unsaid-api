@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LanguageEnum } from "../../common/enum/index.js";
+import { GenderEnum, LanguageEnum } from "../../common/enum/index.js";
 import { generalValidationFields } from "../../common/validation.js";
 
 const loginSchema = (lang = LanguageEnum.EN) =>
@@ -73,21 +73,71 @@ export const otp = (lang = LanguageEnum.EN) =>
   });
 
 export const resetForgotPassword = (lang = LanguageEnum.EN) =>
-  z
-    .object({
-      body: z.strictObject({
+  z.object({
+    body: z
+      .strictObject({
         email: generalValidationFields.email(lang),
         otp: generalValidationFields.otp(lang),
         password: generalValidationFields.password(lang),
         confirmPassword: generalValidationFields.password(lang),
+      })
+      .superRefine((data, ctx) => {
+        generalValidationFields.matchFields({
+          original: "password",
+          copy: "confirmPassword",
+          data,
+          ctx,
+          lang,
+        });
       }),
-    })
-    .superRefine((data, ctx) => {
-      generalValidationFields.matchFields({
-        original: "password",
-        copy: "confirmPassword",
-        data,
-        ctx,
-        lang,
-      });
-    });
+  });
+
+export const updatePassword = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: z
+      .strictObject({
+        currentPassword: generalValidationFields.password(lang),
+        newPassword: generalValidationFields.password(lang),
+        confirmNewPassword: generalValidationFields.password(lang),
+      })
+      .superRefine((data, ctx) => {
+        generalValidationFields.NotMatchFields({
+          original: "currentPassword",
+          copy: "newPassword",
+          data,
+          ctx,
+          lang,
+        });
+        generalValidationFields.matchFields({
+          original: "newPassword",
+          copy: "confirmNewPassword",
+          data,
+          ctx,
+          lang,
+        });
+      }),
+  });
+
+export const updateProfile = (lang = LanguageEnum.EN) =>
+  z.object({
+    body: z
+      .strictObject({
+        username: generalValidationFields.username(lang).optional(),
+        phone: generalValidationFields.phone(lang).optional(),
+        gender: generalValidationFields.gender(lang).optional(),
+        firstName: generalValidationFields.firstName(lang).optional(),
+        lastName: generalValidationFields.lastName(lang).optional(),
+      })
+      .superRefine((data, ctx) => {
+        console.log({ data });
+        if (Object.keys(data).length === 0) {
+          ctx.addIssue({
+            code: "custom",
+            message:
+              lang === LanguageEnum.EN
+                ? "At least one field is required"
+                : "مطلوب حقل واحد على الأقل",
+          });
+        }
+      }),
+  });

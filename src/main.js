@@ -5,15 +5,28 @@ import {
   userController,
 } from "./modules/index.js";
 import { globalErrorHandling } from "./middleware/index.js";
-import { PORT } from "./config.js";
+import { ORIGINS, PORT } from "./config.js";
 import { bootstrapDB } from "./DB/connection.db.js";
 import cors from "cors";
+import helmet from "helmet";
 
 const app = express();
 await bootstrapDB(app, PORT);
 
-app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!ORIGINS.includes(origin)) {
+      callback(
+        new Error("Unauthorized origin", { cause: { status: 401 } }),
+        ORIGINS,
+      );
+    } else {
+      callback(null, ORIGINS);
+    }
+  },
+};
+
+app.use(helmet(), cors(), express.json());
 app.use("/assets", express.static("./assets"));
 
 app.all("/", (req, res) => res.status(200).json({ message: "Welcome" }));

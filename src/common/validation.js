@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { LanguageEnum } from "./enum/security.enum.js";
+import { GenderEnum } from "./enum/user.enum.js";
+import mongoose from "mongoose";
 
 const validationMessages = {
   email: {
@@ -22,6 +24,22 @@ const validationMessages = {
     [LanguageEnum.EN]: "Username must contain two parts",
     [LanguageEnum.AR]: "يجب أن يحتوي اسم المستخدم على جزأين",
   },
+  firstName: {
+    [LanguageEnum.EN]: "Please enter a valid first name",
+    [LanguageEnum.AR]: "الرجاء إدخال اسم أول صالح",
+  },
+  lastName: {
+    [LanguageEnum.EN]: "Please enter a valid last name",
+    [LanguageEnum.AR]: "الرجاء إدخال اسم عائلة صالح",
+  },
+  otp: {
+    [LanguageEnum.EN]: "OTP must be a 6-digit number",
+    [LanguageEnum.AR]: "يجب أن يكون OTP رقمًا مكونًا من 6 أرقام",
+  },
+  id: {
+    [LanguageEnum.EN]: "Invalid ID format",
+    [LanguageEnum.AR]: "تنسيق ID غير صحيح",
+  },
 };
 
 const getValidationMessage = (field, lang = LanguageEnum.EN) => {
@@ -41,6 +59,27 @@ const matchFields = ({ original, copy, data, ctx, lang = LanguageEnum.EN }) => {
   }
 };
 
+const NotMatchFields = ({
+  original,
+  copy,
+  data,
+  ctx,
+  lang = LanguageEnum.EN,
+}) => {
+  if (data[original] === data[copy]) {
+    console.log(data[original], data[copy]);
+    console.log({ dataNotMatchFields: data });
+    ctx.addIssue({
+      code: "custom",
+      path: [copy],
+      message:
+        lang === LanguageEnum.EN
+          ? `${copy} must not match ${original}`
+          : `${copy} يجب أن لا يتطابق مع ${original}`,
+    });
+  }
+};
+
 export const generalValidationFields = {
   email: (lang = LanguageEnum.EN) => {
     return z.email({
@@ -48,7 +87,9 @@ export const generalValidationFields = {
     });
   },
   otp: (lang = LanguageEnum.EN) => {
-    return z.string().regex(/^\d{6}$/, { error: "Invalid code" });
+    return z
+      .string()
+      .regex(/^\d{6}$/, { message: getValidationMessage("otp", lang) });
   },
   password: (lang = LanguageEnum.EN) => {
     return z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, {
@@ -60,6 +101,19 @@ export const generalValidationFields = {
       message: getValidationMessage("username", lang),
     });
   },
+  firstName: (lang = LanguageEnum.EN) => {
+    return z.string().regex(/^[a-zA-Z]{2,25}$/, {
+      message: getValidationMessage("firstName", lang),
+    });
+  },
+  lastName: (lang = LanguageEnum.EN) => {
+    return z.string().regex(/^[a-zA-Z]{2,25}$/, {
+      message: getValidationMessage("lastName", lang),
+    });
+  },
+  gender: (lang = LanguageEnum.EN) => {
+    return z.enum(GenderEnum);
+  },
   phone: (lang = LanguageEnum.EN) => {
     return z
       .string()
@@ -68,5 +122,22 @@ export const generalValidationFields = {
       })
       .optional();
   },
+  id: (lang) => {
+    return z.string().refine((data) => mongoose.Types.ObjectId.isValid(data), {
+      message: getValidationMessage("id", lang),
+    });
+  },
+  file: (lang) => {
+    return z.strictObject({
+      fieldname: z.string(),
+      originalname: z.string(),
+      encoding: z.string(),
+      mimetype: z.string(),
+      buffer: z.instanceof(Buffer),
+      size: z.number(),
+      path: z.string(),
+    });
+  },
   matchFields,
+  NotMatchFields,
 };
