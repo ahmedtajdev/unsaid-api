@@ -66,7 +66,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\"\r\n}",
+              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf555\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -93,7 +93,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n    \"otp\": \"347182\"\r\n}",
+              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n    \"otp\": \"196888\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -239,7 +239,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"midotajj@gmail.com\",\r\n  \"otp\": \"205093\"\r\n}",
+              "raw": "{\r\n  \"email\": \"midotajj@gmail.com\",\r\n  \"otp\": \"135268\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -304,7 +304,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"phone\": null\r\n}",
+              "raw": "{\r\n    \"phone\": \"01234567890\",\r\n    \"username\": \"sami omar\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -378,7 +378,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"action\": 1\r\n}",
+              "raw": "{\r\n    \"action\": 0\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -442,7 +442,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"otp\": \"723584\"\r\n}",
+              "raw": "{\r\n    \"otp\": \"295834\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -492,6 +492,172 @@
               "path": [
                 "user",
                 "profile-image"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "update-password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"currentPassword\": \"Aiefnfgfgf55525\",\r\n   \"newPassword\": \"Aiefnfgfgf555\",\r\n   \"confirmNewPassword\": \"Aiefnfgfgf555\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/user/update-password",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "user",
+                "update-password"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "message",
+      "item": [
+        {
+          "name": "create message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "content",
+                  "value": "good",
+                  "type": "text"
+                },
+                {
+                  "key": "receiverId",
+                  "value": "6aca1dd37a9b26516218d6c5",
+                  "type": "text"
+                },
+                {
+                  "key": "attachments",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/message/",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "message",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-all-messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/message?filterBy=all&page=1&limit=5&sortBy=createdAt-asc",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "message"
+              ],
+              "query": [
+                {
+                  "key": "filterBy",
+                  "value": "all"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt-asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete-message",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/message/{{messageId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "message",
+                "{{messageId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-message-by-id",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/message/{{messageId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "message",
+                "{{messageId}}"
               ]
             }
           },
