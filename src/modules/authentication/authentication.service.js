@@ -320,6 +320,7 @@ export const resetForgotPassword = async ({ otp, email, password }) => {
 
 export const login = async ({ email, password }, { issuer }) => {
   try {
+    console.log({ issuer });
     const user = await findOne({
       model: UserModel,
       filter: {

@@ -3,6 +3,7 @@ import {
   ACCESS_ADMIN_TOKEN_SIGNATURE,
   ACCESS_TOKEN_EXPIRES_IN,
   ACCESS_USER_TOKEN_SIGNATURE,
+  JWT_ISSUER,
   PORT,
   REFRESH_ADMIN_TOKEN_SIGNATURE,
   REFRESH_TOKEN_EXPIRES_IN,
@@ -80,8 +81,9 @@ export const verifyToken = ({
   secretKey = ACCESS_USER_TOKEN_SIGNATURE,
 } = {}) => {
   try {
+    console.log({ JWT_ISSUER });
     return jwt.verify(token, secretKey, {
-      issuer: `http://localhost:${PORT}`,
+      issuer: JWT_ISSUER,
       audience: [RoleEnum.USER, RoleEnum.ADMIN],
     });
   } catch (error) {

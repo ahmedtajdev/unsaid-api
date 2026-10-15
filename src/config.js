@@ -41,6 +41,8 @@ export const REFRESH_TOKEN_EXPIRES_IN = parseInt(
   process.env.REFRESH_TOKEN_EXPIRES_IN ?? "31536000",
 );
 
+export const JWT_ISSUER = process.env.JWT_ISSUER;
+
 export const WEB_CLIENT_IDS = process.env.WEB_CLIENT_IDS.split(",");
 
 export const ORIGINS = process.env.ORIGINS.split(",");
