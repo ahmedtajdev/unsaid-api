@@ -3,6 +3,7 @@ import {
   ACCESS_ADMIN_TOKEN_SIGNATURE,
   ACCESS_TOKEN_EXPIRES_IN,
   ACCESS_USER_TOKEN_SIGNATURE,
+  PORT,
   REFRESH_ADMIN_TOKEN_SIGNATURE,
   REFRESH_TOKEN_EXPIRES_IN,
   REFRESH_USER_TOKEN_SIGNATURE,
@@ -80,10 +81,11 @@ export const verifyToken = ({
 } = {}) => {
   try {
     return jwt.verify(token, secretKey, {
-      issuer: "http://localhost:3000",
+      issuer: `http://localhost:${PORT}`,
       audience: [RoleEnum.USER, RoleEnum.ADMIN],
     });
   } catch (error) {
+    console.log({ error });
     throw UnauthorizedException("Invalid or expired token");
   }
 };
