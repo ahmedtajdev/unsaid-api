@@ -1,6 +1,9 @@
 import { resolve } from "node:path";
 import { config } from "dotenv";
-config({ path: resolve(`.env.${process.env.NODE_ENV ?? "development"}`) });
+
+export const NODE_ENV = process.env.NODE_ENV ?? "development";
+
+config({ path: resolve(`.env.${NODE_ENV}`) });
 
 export const PORT = parseInt(process.env.PORT ?? "9000");
 
@@ -41,3 +44,7 @@ export const REFRESH_TOKEN_EXPIRES_IN = parseInt(
 export const WEB_CLIENT_IDS = process.env.WEB_CLIENT_IDS.split(",");
 
 export const ORIGINS = process.env.ORIGINS.split(",");
+export const ALLOWED_COUNTRIES = process.env.ALLOWED_COUNTRIES.split(",");
+export const LIMIT = parseInt(process.env.LIMIT);
+export const LOGIN_LIMIT = parseInt(process.env.LOGIN_LIMIT);
+export const BLOCK_IN_SECONDS = parseInt(process.env.BLOCK_IN_SECONDS);

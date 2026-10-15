@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { successResponse } from "../../common/utils/index.js";
+import { generateLimiter, successResponse } from "../../common/utils/index.js";
 import {
   confirmEmail,
   forgotPassword,
@@ -13,6 +13,8 @@ import {
 } from "./authentication.service.js";
 import * as validators from "./authentication.validation.js";
 import { validation } from "../../middleware/index.js";
+import { del } from "../../common/services/cache.service.js";
+import { LOGIN_LIMIT } from "../../config.js";
 
 const router = Router({
   strict: true,
@@ -74,13 +76,24 @@ router.patch(
     return successResponse({ res, message });
   },
 );
-
-router.post("/login", validation(validators.login), async (req, res) => {
-  const data = await login(req.validated.body, {
-    issuer: `${req.protocol}://${req.host}`,
-  });
-  return successResponse({ res, data });
+const loginLimiter = generateLimiter({
+  limit: LOGIN_LIMIT,
+  ttl: 5 * 60,
+  skipSuccessfulRequests: true,
 });
+
+router.post(
+  "/login",
+  loginLimiter,
+  validation(validators.login),
+  async (req, res) => {
+    const data = await login(req.validated.body, {
+      issuer: `${req.protocol}://${req.host}`,
+    });
+    await del({ key: req.rateLimit.key });
+    return successResponse({ res, data });
+  },
+);
 
 router.post(
   "/login-confirmation",

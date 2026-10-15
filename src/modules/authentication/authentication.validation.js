@@ -129,7 +129,6 @@ export const updateProfile = (lang = LanguageEnum.EN) =>
         lastName: generalValidationFields.lastName(lang).optional(),
       })
       .superRefine((data, ctx) => {
-        console.log({ data });
         if (Object.keys(data).length === 0) {
           ctx.addIssue({
             code: "custom",

@@ -71,13 +71,12 @@ const uploadProfileImage = async ({ user, file, uniqueFilePath }) => {
 
   await set({
     key,
-    value: file.path,
+    value: uploadedFile.path,
   });
-  return file;
+  return uploadedFile;
 };
 
 const processFilesArray = async ({
-  user,
   customPath,
   files = [],
   validation = [],
@@ -145,7 +144,6 @@ export const processMulterUpload = async ({
     }
   } else if (Array.isArray(req.files)) {
     await processFilesArray({
-      user: req.user,
       customPath,
       files: req.files,
       validation,

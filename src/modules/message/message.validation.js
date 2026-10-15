@@ -11,6 +11,7 @@ export const createMessage = (lang) => {
     .object({
       body: z.strictObject({
         receiverId: generalValidationFields.id(lang),
+        conversationId: generalValidationFields.id(lang).optional(),
         content: z.string().min(2).max(50000).optional(),
       }),
       files: z.array(generalValidationFields.file(lang)).max(3).optional(),

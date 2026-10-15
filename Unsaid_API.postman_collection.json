@@ -17,10 +17,15 @@
               "type": "noauth"
             },
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"username\": \"Ahmed Hamed\",\r\n  \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"phone\": \"01234567890\"\r\n}",
+              "raw": "{\r\n  \"username\": \"ahmed ahmed\",\r\n  \"email\": \"ahmedtaj.dev@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\",\r\n   \"confirmPassword\": \"Aiefnfgfgf55525\",\r\n   \"phone\": \"01234567890\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -62,11 +67,15 @@
               {
                 "key": "Accept-Language",
                 "value": "1"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf555\"\r\n}",
+              "raw": "{\r\n    // \"email\": \"midotajj@gmail.com\",\r\n    \"email\": \"ahmedtaj.dev@gmail.com\",\r\n   \"password\": \"Aiefnfgfgf55525\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -93,7 +102,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"email\": \"midotajj@gmail.com\",\r\n    \"otp\": \"196888\"\r\n}",
+              "raw": "{\r\n    \"email\": \"ahmedtaj.dev@gmail.com\",\r\n    \"otp\": \"121928\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -239,7 +248,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"email\": \"midotajj@gmail.com\",\r\n  \"otp\": \"135268\"\r\n}",
+              "raw": "{\r\n  \"email\": \"midotajj@gmail.com\",\r\n  \"otp\": \"505955\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -342,6 +351,10 @@
               {
                 "key": "Authorization",
                 "value": "{{BEARER_REFRESH_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
               }
             ],
             "body": {
@@ -470,6 +483,10 @@
               {
                 "key": "Authorization",
                 "value": "{{BEARER_ACCESS_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
               }
             ],
             "body": {
@@ -479,7 +496,7 @@
                   "key": "attachment",
                   "type": "file",
                   "src": [
-                    "/C:/Users/asus/Pictures/Screenshots/Screenshot (219).png"
+                    "/C:/Users/asus/Pictures/Screenshots/Screenshot 2026-10-03 111003.png"
                   ]
                 }
               ]
@@ -542,6 +559,10 @@
               {
                 "key": "Authorization",
                 "value": "{{BEARER_ACCESS_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
               }
             ],
             "body": {
@@ -549,18 +570,18 @@
               "formdata": [
                 {
                   "key": "content",
-                  "value": "good",
+                  "value": "Hi mido",
                   "type": "text"
                 },
                 {
                   "key": "receiverId",
-                  "value": "6aca1dd37a9b26516218d6c5",
+                  "value": "6accb0113ffcde083df6e75f",
                   "type": "text"
                 },
                 {
-                  "key": "attachments",
-                  "type": "file",
-                  "src": []
+                  "key": "conversationId",
+                  "value": "6ad0bdb914e5082f40af053b",
+                  "type": "text"
                 }
               ]
             },
@@ -585,10 +606,14 @@
               {
                 "key": "Authorization",
                 "value": "{{BEARER_ACCESS_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
               }
             ],
             "url": {
-              "raw": "{{BASE_URL}}/message?filterBy=all&page=1&limit=5&sortBy=createdAt-asc",
+              "raw": "{{BASE_URL}}/message?page=1&limit=7&filterBy=inbox",
               "host": [
                 "{{BASE_URL}}"
               ],
@@ -597,20 +622,16 @@
               ],
               "query": [
                 {
-                  "key": "filterBy",
-                  "value": "all"
-                },
-                {
                   "key": "page",
                   "value": "1"
                 },
                 {
                   "key": "limit",
-                  "value": "5"
+                  "value": "7"
                 },
                 {
-                  "key": "sortBy",
-                  "value": "createdAt-asc"
+                  "key": "filterBy",
+                  "value": "inbox"
                 }
               ]
             }
@@ -658,6 +679,139 @@
               "path": [
                 "message",
                 "{{messageId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "request",
+      "item": [
+        {
+          "name": "request-sender-identity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/request/{{messageId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "request",
+                "{{messageId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-all-requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/request?filterBy=inbox",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "request"
+              ],
+              "query": [
+                {
+                  "key": "filterBy",
+                  "value": "inbox"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "process-request",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              },
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"status\": 1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/request/{{requestId}}/process",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "request",
+                "{{requestId}}",
+                "process"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "conversation",
+      "item": [
+        {
+          "name": "get-all-conversation-messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "{{x-forwarded-for}}",
+                "value": "{{ipAddress}}"
+              },
+              {
+                "key": "Authorization",
+                "value": "{{BEARER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/conversation/{{conversationId}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "conversation",
+                "{{conversationId}}"
               ]
             }
           },

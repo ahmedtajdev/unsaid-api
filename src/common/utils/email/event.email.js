@@ -17,6 +17,6 @@ emailEvent.on("sendEmail", async ({ recipients, subject, data }) => {
       }),
     });
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 });

@@ -70,7 +70,6 @@ export const enableTwoStepVerification = async (user) => {
 
     return "OTP sent to your email, please check your email and verify the OTP to enable Two Step Verification";
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -103,7 +102,6 @@ export const verifyEnableTwoStepVerificationCode = async (user, body) => {
 
     return "Two Step Verification enabled successfully";
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -111,8 +109,6 @@ export const verifyEnableTwoStepVerificationCode = async (user, body) => {
 export const updatePassword = async (user, payload, body) => {
   try {
     const { currentPassword, newPassword } = body;
-
-    console.log({ currentPassword, userPassword: user.password });
 
     const isCurrentPasswordCorrect = await compare(
       currentPassword,
@@ -128,7 +124,6 @@ export const updatePassword = async (user, payload, body) => {
 
     return "Password updated successfully";
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };

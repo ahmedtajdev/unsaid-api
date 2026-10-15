@@ -67,8 +67,6 @@ const NotMatchFields = ({
   lang = LanguageEnum.EN,
 }) => {
   if (data[original] === data[copy]) {
-    console.log(data[original], data[copy]);
-    console.log({ dataNotMatchFields: data });
     ctx.addIssue({
       code: "custom",
       path: [copy],

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import {
   FilterMessagesEnum,
   SortMessagesEnum,
@@ -6,11 +7,17 @@ import { NotfoundException } from "../../common/exceptions/index.js";
 import {
   createOne,
   deleteOne,
+  find,
   findById,
   findOne,
   paginate,
 } from "../../common/repository/index.js";
-import { MessageModel, UserModel } from "../../DB/models/index.js";
+import {
+  ConversationModel,
+  MessageModel,
+  RequestModel,
+  UserModel,
+} from "../../DB/models/index.js";
 
 const sortMessages = (sortBy) => {
   switch (sortBy) {
@@ -40,9 +47,10 @@ const filterMessages = (filterBy, user) => {
 };
 
 const searchMessages = (search) => {
-  if (search) {
+  const searchKeyword = search.trim();
+  if (searchKeyword) {
     return {
-      content: { $regex: search, $options: "i" },
+      content: { $regex: searchKeyword, $options: "i" },
     };
   } else {
     return {};
@@ -50,25 +58,39 @@ const searchMessages = (search) => {
 };
 
 export const createMessage = async (
-  { content, receiverId } = {},
+  { content, receiverId, conversationId = undefined } = {},
   files = [],
-  user = undefined,
+  sender = undefined,
 ) => {
   try {
     const receiver = await findById({ model: UserModel, id: receiverId });
 
     if (!receiver) {
-      throw NotfoundException("Invalid receiver ID");
+      throw NotfoundException("Invalid receiver id");
     }
 
     const attachments = files.map((file) => file.path);
-    const senderId = user ? user._id : undefined;
+    const senderId = sender ? sender._id : undefined;
+
+    if (conversationId) {
+      const existConversation = await findOne({
+        model: ConversationModel,
+        filter: {
+          _id: conversationId,
+          participants: { $all: [senderId, receiverId] },
+        },
+      });
+      if (!existConversation) {
+        throw NotfoundException("Invalid conversation id");
+      }
+    }
 
     const message = await createOne({
       model: MessageModel,
       data: {
         receiverId,
         senderId,
+        conversationId,
         content,
         attachments,
       },
@@ -79,6 +101,7 @@ export const createMessage = async (
     throw error;
   }
 };
+
 export const getAllMessages = async (
   {
     filterBy = FilterMessagesEnum.INBOX,
@@ -90,9 +113,17 @@ export const getAllMessages = async (
   user,
 ) => {
   try {
+    const acceptedRequest = await findOne({
+      model: RequestModel,
+      filter: {
+        $or: [{ senderId: user._id }, { receiverId: user._id }],
+        status: 1,
+      },
+    });
+
     const filter = {
       ...filterMessages(filterBy, user),
-      ...searchMessages(search?.trim()),
+      ...searchMessages(search),
     };
 
     return await paginate({
@@ -101,9 +132,61 @@ export const getAllMessages = async (
       page,
       limit,
       options: {
+        populate: [
+          {
+            path: "sender",
+            select: "firstName lastName image",
+          },
+          {
+            path: "receiver",
+            select: "firstName lastName image",
+          },
+        ],
+        select: !acceptedRequest ? "-senderId" : undefined,
         sort: { ...sortMessages(sortBy) },
       },
     });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getMessageById = async ({ messageId }, user) => {
+  try {
+    const acceptedRequest = await findOne({
+      model: RequestModel,
+      filter: {
+        $or: [{ senderId: user._id }, { receiverId: user._id }],
+        status: 1,
+      },
+    });
+
+    const message = await findOne({
+      model: MessageModel,
+      filter: {
+        _id: messageId,
+        $or: [{ receiverId: user._id }, { senderId: user._id }],
+      },
+      options: {
+        populate: [
+          {
+            path: "sender",
+            select: "firstName lastName image",
+          },
+          {
+            path: "receiver",
+            select: "firstName lastName image",
+          },
+        ],
+        select: !acceptedRequest ? "-senderId" : undefined,
+      },
+    });
+
+    if (!message) {
+      throw NotfoundException("Invalid message id");
+    }
+
+    return message;
   } catch (error) {
     throw error;
   }
@@ -124,26 +207,6 @@ export const deleteMessage = async ({ messageId }, user) => {
     }
 
     return "Message deleted successfully";
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getMessageById = async ({ messageId }, user) => {
-  try {
-    const message = await findOne({
-      model: MessageModel,
-      filter: {
-        _id: messageId,
-        receiverId: user._id,
-      },
-    });
-
-    if (!message) {
-      throw NotfoundException("Invalid message id");
-    }
-
-    return message;
   } catch (error) {
     throw error;
   }

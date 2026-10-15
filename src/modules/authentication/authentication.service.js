@@ -42,8 +42,6 @@ async function verifyGoogleAccount(idToken) {
   });
   const payload = ticket.getPayload();
 
-  console.log({ payload });
-
   if (!payload.email_verified) {
     throw BadRequestException("Email not verified");
   }
@@ -53,7 +51,6 @@ async function verifyGoogleAccount(idToken) {
 
 export const signupWithGmail = async ({ idToken }) => {
   try {
-    console.log({ idToken });
     const { name, email, picture } = await verifyGoogleAccount(idToken);
 
     const existAccount = await findOne({
@@ -88,7 +85,6 @@ export const signupWithGmail = async ({ idToken }) => {
       data: await createLoginCredentials({ user }),
     };
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -146,7 +142,6 @@ export const sendEmailOtp = async ({
 
     return "OTP sent to your email, please check your email and verify the OTP";
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -178,7 +173,6 @@ export const signup = async ({ username, email, password, phone }) => {
       title: EmailTitleEnum.CONFIRM_EMAIL,
     });
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -204,7 +198,6 @@ export const resendEmailOtp = async ({ email }) => {
       title: EmailTitleEnum.CONFIRM_EMAIL,
     });
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -230,7 +223,6 @@ export const forgotPassword = async ({ email }) => {
       title: EmailTitleEnum.FORGOT_PASSWORD,
     });
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -270,7 +262,6 @@ export const confirmEmail = async ({ otp, email }) => {
     });
     return "Email confirmed successfully";
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -300,7 +291,6 @@ export const verifyForgotPasswordCode = async ({ otp, email }) => {
 
     return "OTP verified successfully";
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -328,10 +318,7 @@ export const resetForgotPassword = async ({ otp, email, password }) => {
   return "Password reset successfully";
 };
 
-export const login = async (
-  { email, password },
-  { issuer, maxTrials = 5, blockInSeconds = 300 },
-) => {
+export const login = async ({ email, password }, { issuer }) => {
   try {
     const user = await findOne({
       model: UserModel,
@@ -346,35 +333,11 @@ export const login = async (
       throw NotfoundException("Invalid email or password");
     }
 
-    const userLoginTrialsKey = `User::${email.trim().toLowerCase()}::Login_Trials`;
-
-    const oldTrials =
-      (await get({
-        key: userLoginTrialsKey,
-      })) ?? 0;
-
-    if (oldTrials >= maxTrials) {
-      throw TooManyRequestsException(
-        `Max login trials have been reached, please try again after ${await ttl({ key: userLoginTrialsKey })}s`,
-      );
-    }
-
     const match = await compare(password, user.password);
 
     if (!match) {
-      const currentTrials = await incBy({ key: userLoginTrialsKey });
-
-      if (currentTrials === maxTrials) {
-        await expire({
-          key: userLoginTrialsKey,
-          ttl: blockInSeconds,
-        });
-      }
-
       throw NotfoundException("Invalid email or password");
     }
-
-    await del({ key: userLoginTrialsKey });
 
     if (user.isTwoStepVerificationEnabled) {
       await sendEmailOtp({
@@ -387,7 +350,6 @@ export const login = async (
 
     return await createLoginCredentials({ user, issuer });
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
@@ -429,7 +391,6 @@ export const loginConfirmation = async ({ otp, email }, { issuer }) => {
 
     return await createLoginCredentials({ user, issuer });
   } catch (error) {
-    console.log({ error });
     throw error;
   }
 };
